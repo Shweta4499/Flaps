@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "../../other/Flap3.ts", "../../other/flap2Parametrics.ts", "../../other/Arc.ts", "../../other/flap1Parametrics.ts"]
+}
