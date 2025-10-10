@@ -1,5 +1,5 @@
-import { getFilletPoints, T_point2d } from "./getFilletPoints";
-import { generateFlap2PathData } from "./flap2"; 
+import { getFilletPoints, T_point2d } from "./Flap2/getFilletPoints";
+import { generateFlap2PathData } from "./Flap2/flap2"; 
 
 // degrees → radians
 const rad = (deg: number): number => (deg * Math.PI) / 180;
