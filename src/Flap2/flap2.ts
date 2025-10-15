@@ -19,13 +19,13 @@ export function generateFlap2PathData(
   theta1: number,
   R: number
 ): string {
-  // --- Step 1 · Derived geometry ---------------------------------------------
+  // Dependencies
   const P = B;
   const Q = A / 3;
   const S = 0.66667 * Q;
   const t1 = rad(theta1);
 
-  // --- Step 2 · Key points ---------------------------------------------------
+  //  points 
   const A_pt: T_point2d = { x: 0, y: 0 };
   const B_pt: T_point2d = { x: P, y: 0 };
   const C_pt: T_point2d = { x: P - S / Math.tan(t1), y: S };
@@ -50,10 +50,10 @@ const maxR1 = lenCD * tanHalf;
 const maxR2 = lenDE * tanHalf;
 const maxR = Math.min(maxR1, maxR2);
 
-// 3️⃣ Clamp R
+// Clamp R
 const validR = R > maxR ? maxR : R < 0 ? 0 : R;
 
-// 4️⃣ Pass into fillet generator
+// Pass into fillet generator
 const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
 
 
@@ -72,7 +72,7 @@ const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
     (T1.x - O.x) * (T2.y - O.y) - (T1.y - O.y) * (T2.x - O.x);
   const sweepFlag = cross < 0 ? 0 : 1;
 
-  // --- Step 6 · Construct SVG path ------------------------------------------
+  //  Construct SVG path
   const arcCmd = `A ${validR.toFixed(4)} ${validR.toFixed(
     4
   )} 0 ${largeArcFlag} ${sweepFlag} ${T2.x.toFixed(4)} ${T2.y.toFixed(4)}`;

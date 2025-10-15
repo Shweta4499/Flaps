@@ -1,5 +1,5 @@
-import { getFilletPoints, T_point2d } from "./Flap2/getFilletPoints";
-import { generateFlap2PathData } from "./Flap2/flap2"; 
+import { getFilletPoints, T_point2d } from "./getFilletPoints";
+import { generateFlap2PathData } from "./flap2"; 
 
 // degrees → radians
 const rad = (deg: number): number => (deg * Math.PI) / 180;
@@ -12,7 +12,11 @@ window.onload = () => {
   const svg = document.createElementNS(svgNS, "svg");
   svg.setAttribute("width", "800");
   svg.setAttribute("height", "600");
-  svg.setAttribute("viewBox", "0 0 150 100");
+   const padding = 30;
+  svg.setAttribute(
+    "viewBox",
+    `${-padding} ${-padding} ${150 + 2 * padding} ${120 + 2 * padding}`
+  );
   svg.style.background = "#f9f9f9";
   svg.style.border = "1px solid #aaa";
   svg.style.margin = "40px";
