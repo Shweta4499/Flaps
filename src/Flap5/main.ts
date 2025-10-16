@@ -1,7 +1,9 @@
 
 
 import { generateFlap5PathData } from "./Flap5";
-import type { T_point2d } from "../Flap5/getFilletPoints";
+import type { T_point2d } from "../Fillet/getFilletPoints";
+import { DEG2RAD } from "three/src/math/MathUtils";
+
 
 window.onload = () => {
   const svgNS = "http://www.w3.org/2000/svg";
@@ -22,11 +24,11 @@ window.onload = () => {
   const theta2 = 90;
 
   // Generate flap path 
-  const { path } = generateFlap5PathData(A, theta1, theta2);
+  const { pathData,pathDataNoZ } = generateFlap5PathData(A, theta1, theta2);
 
   //  Draw main shape 
   const flapPath = document.createElementNS(svgNS, "path");
-  flapPath.setAttribute("d", path);
+  flapPath.setAttribute("d", pathData);
   flapPath.setAttribute("stroke", "#111");
   flapPath.setAttribute("stroke-width", "2.5");
   flapPath.setAttribute("fill", "#cce4ff");
@@ -64,7 +66,7 @@ window.onload = () => {
   };
 
   // Compute points locally 
-  const rad = (deg: number) => (deg * Math.PI) / 180;
+const rad = (deg: number): number => deg * DEG2RAD;
   const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
   const P = A;

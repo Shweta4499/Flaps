@@ -1,16 +1,23 @@
-import { getFilletPoints } from "./getFilletPoints";
-import type { T_point2d } from "./getFilletPoints";
-
-//Convert degrees → radians 
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+import { getFilletPoints } from "../Fillet/getFilletPoints";
+import type { T_point2d } from "../Fillet/getFilletPoints";
+import { DEG2RAD } from "three/src/math/MathUtils";
 
 
+/**
+ * Convert degrees → radians
+ */
+const rad = (deg: number): number => deg * DEG2RAD;
+
+export type T_PathOutput = {
+  pathData: string;
+  pathDataNoZ: string;
+};
 export function generateFlap3PathData(
   A: number,
   B: number,
   theta1: number,
   R: number
-): string {
+): T_PathOutput {
   //  Dependencies
   const P = A;
   const Q = B / 2;
@@ -40,7 +47,8 @@ export function generateFlap3PathData(
   const maxR1 = Math.min(maxR1a, maxR1b);
   const validR1 = R > maxR1 ? maxR1 : R < 0 ? 0 : R;
 
-  const { T1: T1a, T2: T2a, O: Oa } = getFilletPoints(C_pt, D_pt, E_pt, validR1);
+const { tangent1: T1a, tangent2: T2a, center: Oa } =
+  getFilletPoints(C_pt, D_pt, E_pt, validR1);
 
   // Fillet 2 → at ∠DEF
   const vED = { x: D_pt.x - E_pt.x, y: D_pt.y - E_pt.y };
@@ -57,7 +65,8 @@ export function generateFlap3PathData(
   const maxR2 = Math.min(maxR2a, maxR2b);
   const validR2 = R > maxR2 ? maxR2 : R < 0 ? 0 : R;
 
-  const { T1: T1b, T2: T2b, O: Ob } = getFilletPoints(D_pt, E_pt, F_pt, validR2);
+const { tangent1: T1b, tangent2: T2b, center: Ob } =
+  getFilletPoints(D_pt, E_pt, F_pt, validR2);
 
   //  Arc geometry
   const arcData = (T1: T_point2d, T2: T_point2d, O: T_point2d, R: number) => {
@@ -76,7 +85,7 @@ export function generateFlap3PathData(
   const arcCmd2 = arcData(T1b, T2b, Ob, validR2); // DEF arc
 
   //  Construct SVG path
-  const path = [
+  const pathData = [
     `M ${A_pt.x} ${A_pt.y}`,                         // A
     `L ${B_pt.x} ${B_pt.y}`,                         // B
     `L ${C_pt.x.toFixed(4)} ${C_pt.y.toFixed(4)}`,   // C
@@ -88,7 +97,9 @@ export function generateFlap3PathData(
     `Z`,                                              // Close shape
   ].join(" ");
 
+  const pathDataNoZ=pathData.replace(/Z$/,"");
+console.log(pathData)
+console.log(pathDataNoZ)
+console.log("POINTS:", { A_pt, B_pt, C_pt, D_pt, E_pt,F_pt ,T1a, T2a,Oa,T1b, T2b, Ob});
+return {pathData, pathDataNoZ}}
 
-
-  return path;
-}

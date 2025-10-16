@@ -1,8 +1,12 @@
-import { getFilletPoints, T_point2d } from "./getFilletPoints";
+import { getFilletPoints, T_point2d } from "../Fillet/getFilletPoints";
 import { generateFlap2PathData } from "./flap2"; 
+import { DEG2RAD } from "three/src/math/MathUtils";
 
-// degrees → radians
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+
+/**
+ * Convert degrees → radians
+ */
+const rad = (deg: number): number => deg * DEG2RAD;
 
 window.onload = () => {
   const svgNS = "http://www.w3.org/2000/svg";
@@ -49,13 +53,12 @@ window.onload = () => {
   
   // Compute Fillet Geometry 
   
-  const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, R);
+const { tangent1: T1, tangent2: T2, center: O } = getFilletPoints(C_pt, D_pt, E_pt, R);
 
-  console.log("POINTS:", { A_pt, B_pt, C_pt, D_pt, E_pt, T1, T2, O });
 
   
   //Get path from flap2.ts 
-  const pathData = generateFlap2PathData(A, B, theta1, R); 
+  const { pathData, pathDataNoZ } = generateFlap2PathData(A, B, theta1, R); 
 
   const flap = document.createElementNS(svgNS, "path");
   flap.setAttribute("d", pathData);

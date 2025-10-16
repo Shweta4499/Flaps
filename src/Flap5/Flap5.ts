@@ -1,10 +1,19 @@
-import { getFilletPoints, type T_point2d } from "../Flap5/getFilletPoints";
+import { getFilletPoints, type T_point2d } from "../Fillet/getFilletPoints";
+import { DEG2RAD } from "three/src/math/MathUtils";
 
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+
+const rad = (deg: number): number => deg * DEG2RAD;
 const clamp = (v: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, v));
+export type T_PathOutput = {
+  pathData: string;
+  pathDataNoZ: string;
+};
 
-export function generateFlap5PathData(A: number, theta1 = 90, theta2 = 120) {
+export function generateFlap5PathData(
+  A: number, 
+  theta1 = 90, 
+  theta2 = 120):T_PathOutput {
   // dependencies
   const P = A;
   const Q = P / 2;
@@ -24,12 +33,12 @@ export function generateFlap5PathData(A: number, theta1 = 90, theta2 = 120) {
     x: A_pt.x + AD_len * Math.cos(t1r),
     y: A_pt.y + AD_len * Math.sin(t1r),
   };
-
   // Fillets at C & D
   const f2 = getFilletPoints(B_pt, C_pt, D_pt, R);
   const f3 = getFilletPoints(C_pt, D_pt, A_pt, R);
-  const { T1: T1b, T2: T2b, O: Ob } = f2;
-  const { T1: T1c, T2: T2c, O: Oc } = f3;
+const { tangent1: T1b, tangent2: T2b, center: Ob } = f2;
+const { tangent1: T1c, tangent2: T2c, center: Oc } = f3;
+
 
   // Arc helper 
   const arc = (O: T_point2d, T1: T_point2d, T2: T_point2d) => {
@@ -112,9 +121,13 @@ export function generateFlap5PathData(A: number, theta1 = 90, theta2 = 120) {
     `L ${A2.x.toFixed(4)} ${A2.y.toFixed(4)}`,
     `Z`,
   ].join(" ");
+    const pathData = [upperPath, lowerPath, rectPath].join(" ");
+  const pathDataNoZ = pathData.replace(/Z/g, ""); 
+
+  console.log(pathData)
+console.log(pathDataNoZ)
+console.log(R)
 
   //  Return combined SVG path 
-  return {
-    path: [upperPath, lowerPath, rectPath].join(" "),
-  };
+  return { pathData, pathDataNoZ };
 }

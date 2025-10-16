@@ -1,14 +1,19 @@
+import { DEG2RAD } from "three/src/math/MathUtils";
+
 export type T_point2d = { x: number; y: number };
 
-const rad = (deg: number): number => (deg * Math.PI) / 180;
-
+const rad = (deg: number): number => deg * DEG2RAD;
+export type T_PathOutput = {
+  pathData: string;
+  pathDataNoZ: string;
+};
 export function generateFlap4PathData(
   A: number,
   B: number,
   theta: number,
   alpha1?: number,
   alpha2?: number,
-): string {
+): T_PathOutput{
   //  Dependencies 
   const P = A;
   const Q = B / 2;
@@ -38,44 +43,44 @@ export function generateFlap4PathData(
   const J_pt = { x: 0, y: S + Q };                     
 
   //  SVG Path 
-  const pathParts: string[] = [];
-  pathParts.push(`M ${A_pt.x} ${A_pt.y}`);
-  pathParts.push(`L ${B_pt.x} ${B_pt.y}`);
+  const pathData: string[] = [];
+  pathData.push(`M ${A_pt.x} ${A_pt.y}`);
+  pathData.push(`L ${B_pt.x} ${B_pt.y}`);
 
   // LEFT OUTWARD CURVE (B→C→D)
   const ctrlBC = {
     x: (B_pt.x + C_pt.x) / 2,
     y: (B_pt.y + C_pt.y) / 2 - S / 6,
   };
-  pathParts.push(
+  pathData.push(
     `Q ${ctrlBC.x.toFixed(4)} ${ctrlBC.y.toFixed(4)}, ${C_pt.x.toFixed(4)} ${C_pt.y.toFixed(4)}`
   );
-  pathParts.push(`L ${D_pt.x} ${D_pt.y}`);
+  pathData.push(`L ${D_pt.x} ${D_pt.y}`);
 
   // EDGE (D→E)
-  pathParts.push(`L ${E_pt.x} ${E_pt.y}`);
-  pathParts.push(`L ${F_pt.x} ${F_pt.y}`);
+  pathData.push(`L ${E_pt.x} ${E_pt.y}`);
+  pathData.push(`L ${F_pt.x} ${F_pt.y}`);
 
   // RIGHT OUTWARD CURVE (F→G)
   const ctrlFG = {
     x: (F_pt.x + G_pt.x) / 2,
     y: (F_pt.y + G_pt.y) / 2 - S / 6,
   };
-  pathParts.push(
+  pathData.push(
     `Q ${ctrlFG.x.toFixed(4)} ${ctrlFG.y.toFixed(4)}, ${G_pt.x.toFixed(4)} ${G_pt.y.toFixed(4)}`
   );
 
   // BOTTOM + CLOSE
-  pathParts.push(`L ${H_pt.x} ${H_pt.y}`);
-  pathParts.push(`L ${I_pt.x} ${I_pt.y}`);
-  pathParts.push(`L ${J_pt.x} ${J_pt.y}`);
-  pathParts.push(`Z`);
+  pathData.push(`L ${H_pt.x} ${H_pt.y}`);
+  pathData.push(`L ${I_pt.x} ${I_pt.y}`);
+  pathData.push(`L ${J_pt.x} ${J_pt.y}`);
+  pathData.push(`Z`);
 
   // Debug 
-  console.log("Flap 4):", {
-    A_pt, B_pt, C_pt, D_pt, E_pt, F_pt, G_pt, H_pt, I_pt, J_pt,
-    ctrlBC, ctrlFG, P, Q, S, M, F
-  });
+ const fullPath=pathData.join("");
+ const pathDataNoZ = fullPath.replace(/Z$/, "");
+console.log(fullPath)
+console.log(pathDataNoZ)
+console.log("POINTS:", { A_pt, B_pt, C_pt, D_pt, E_pt,F_pt ,G_pt,I_pt,J_pt});
+return {pathData:fullPath, pathDataNoZ}}
 
-  return pathParts.join(" ");
-}

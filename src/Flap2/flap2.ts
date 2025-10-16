@@ -1,10 +1,11 @@
-import { getFilletPoints } from "./getFilletPoints";
-import type { T_point2d } from "./getFilletPoints";
+import { getFilletPoints } from "../Fillet/getFilletPoints";
+import type { T_point2d } from "../Fillet/getFilletPoints";
+import { DEG2RAD } from "three/src/math/MathUtils";
 
 /**
  * Convert degrees → radians
  */
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+const rad = (deg: number): number => deg * DEG2RAD;
 
 /**
  * Calculate Euclidean distance between two 2D points.
@@ -12,13 +13,16 @@ const rad = (deg: number): number => (deg * Math.PI) / 180;
 const getDistance2d = (p1: T_point2d, p2: T_point2d): number =>
   Math.hypot(p2.x - p1.x, p2.y - p1.y);
 
-
+export type T_PathOutput = {
+  pathData: string;
+  pathDataNoZ: string;
+};
 export function generateFlap2PathData(
   A: number,
   B: number,
   theta1: number,
   R: number
-): string {
+): T_PathOutput {
   // Dependencies
   const P = B;
   const Q = A / 3;
@@ -54,7 +58,7 @@ const maxR = Math.min(maxR1, maxR2);
 const validR = R > maxR ? maxR : R < 0 ? 0 : R;
 
 // Pass into fillet generator
-const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
+const { tangent1: T1, tangent2: T2, center: O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
 
 
  
@@ -77,7 +81,7 @@ const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
     4
   )} 0 ${largeArcFlag} ${sweepFlag} ${T2.x.toFixed(4)} ${T2.y.toFixed(4)}`;
 
-  const path = [
+  const pathData = [
     `M ${A_pt.x} ${A_pt.y}`,                        // Start A
     `L ${B_pt.x} ${B_pt.y}`,                        // B
     `L ${C_pt.x.toFixed(4)} ${C_pt.y.toFixed(4)}`,  // C
@@ -87,7 +91,9 @@ const { T1, T2, O } = getFilletPoints(C_pt, D_pt, E_pt, validR);
     `Z`,                                            // Close path
   ].join(" ");
 
-   console.log({ R, validR, maxR});
+const pathDataNoZ=pathData.replace(/Z$/,"");
+console.log(pathData)
+console.log(pathDataNoZ)
+console.log("POINTS:", { A_pt, B_pt, C_pt, D_pt, E_pt, T1, T2, O });
 
-  return path;
-}
+return {pathData, pathDataNoZ}}

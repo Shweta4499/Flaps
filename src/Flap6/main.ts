@@ -1,9 +1,11 @@
 import { generateFlap6PathData } from "./Flap6";
+import { DEG2RAD } from "three/src/math/MathUtils";
+
 
 window.onload = () => {
   const svgNS = "http://www.w3.org/2000/svg";
 
-  // === SVG Canvas ===
+  // SVG Canvas 
   const svg = document.createElementNS(svgNS, "svg");
   svg.setAttribute("width", "800");
   svg.setAttribute("height", "600");
@@ -13,28 +15,26 @@ window.onload = () => {
   svg.style.margin = "40px";
   document.body.appendChild(svg);
 
-  // === Parameters ===
-  const P = 200;   // rectangle width
-  const Q = 160;   // rectangle height
+  // Parameters
+  const P = 250;   // rectangle width
+  const Q = 190;   // rectangle height
   const theta1 = 70;
   const theta2 = 70;
   const W = 50;    // flap height
   const R = 12;    // fillet radius
   const rCircle = 45; // center circle radius
 
-  // === Generate path from Flap6.ts ===
-  const path = generateFlap6PathData(P, Q, theta1, theta2, W, R, rCircle);
+  //  Generate path from Flap6.ts 
+  const {pathData,pathDataNoZ} = generateFlap6PathData(P, Q, theta1, theta2, W, R, rCircle);
 
-  // === Draw main shape ===
   const flap = document.createElementNS(svgNS, "path");
-  flap.setAttribute("d", path);
+  flap.setAttribute("d", pathData);
   flap.setAttribute("stroke", "#111");
   flap.setAttribute("stroke-width", "2.4");
   flap.setAttribute("fill", "#cce4ff");
   svg.appendChild(flap);
 
-  // === Helper functions ===
-  const rad = (deg: number): number => (deg * Math.PI) / 180;
+const rad = (deg: number): number => deg * DEG2RAD;
   const clamp = (v: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, v));
 
@@ -51,7 +51,7 @@ window.onload = () => {
     x: number,
     y: number,
     text: string,
-    color = "#000", // text always black
+    color = "#000", 
     size = 10
   ) => {
     const t = document.createElementNS(svgNS, "text");
@@ -65,7 +65,6 @@ window.onload = () => {
     svg.appendChild(t);
   };
 
-  // === Compute geometry points ===
   const A = { x: 0, y: 0 };
   const B = { x: P, y: 0 };
   const C = { x: P, y: Q };
@@ -88,7 +87,6 @@ window.onload = () => {
 
   const center = { x: P / 2, y: Q / 2 };
 
-  // === Points with text size customization ===
   const points = [
     { p: A, name: "A", size: 10 },
     { p: B, name: "B", size: 10 },
@@ -105,15 +103,13 @@ window.onload = () => {
     { p: center, name: "Center", size: 12 },
   ];
 
-  // === Draw all points: red circles + black text ===
   for (const { p, name, size } of points) {
-    addPoint(p, "red", 2.3); // 🔴 all circles red
+    addPoint(p, "red", 2.3);
     addText(
       p.x,
       p.y,
       `${name} (${p.x.toFixed(1)}, ${p.y.toFixed(1)})`,
-      "#000", // ⚫ all text black
-      size
+      "#000", 
     );
   }
 };

@@ -1,8 +1,12 @@
-import { getFilletPoints, type T_point2d } from "../Flap3/getFilletPoints";
+import { getFilletPoints, type T_point2d } from "../Fillet/getFilletPoints";
 import { generateFlap3PathData } from "../Flap3/Flap3";
+import { DEG2RAD } from "three/src/math/MathUtils";
 
-// degrees → radians
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+
+/**
+ * Convert degrees → radians
+ */
+const rad = (deg: number): number => deg * DEG2RAD;
 
 window.onload = () => {
   const svgNS = "http://www.w3.org/2000/svg";
@@ -40,11 +44,11 @@ svg.setAttribute("viewBox", `${-padding} ${-padding} ${150 + 2 * padding} ${100 
 
   // === Fillet 1 (CDE) ===
   const fillet1 = getFilletPoints(C_pt, D_pt, E_pt, R);
-  const { T1: T1a, T2: T2a, O: Oa } = fillet1;
+const { tangent1: T1a, tangent2: T2a, center: Oa } = fillet1;
 
   // === Fillet 2 (DEF) ===
   const fillet2 = getFilletPoints(D_pt, E_pt, F_pt, R);
-  const { T1: T1b, T2: T2b, O: Ob } = fillet2;
+const { tangent1: T1b, tangent2: T2b, center: Ob } = fillet2;
 
   console.log("POINTS:", {
     A_pt, B_pt, C_pt, D_pt, E_pt, F_pt,
@@ -52,7 +56,7 @@ svg.setAttribute("viewBox", `${-padding} ${-padding} ${150 + 2 * padding} ${100 
   });
 
   // === Path from flap3.ts ===
-  const pathData = generateFlap3PathData(A, B, theta1, R);
+  const {pathData,pathDataNoZ} = generateFlap3PathData(A, B, theta1, R);
 
   const flap = document.createElementNS(svgNS, "path");
   flap.setAttribute("d", pathData);

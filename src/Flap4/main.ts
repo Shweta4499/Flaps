@@ -1,7 +1,9 @@
 import { generateFlap4PathData } from "./Flap4";
+import { DEG2RAD } from "three/src/math/MathUtils";
+
 
 type T_point2d = { x: number; y: number };
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+const rad = (deg: number): number => deg * DEG2RAD;
 
 window.onload = () => {
   const svgNS = "http://www.w3.org/2000/svg";
@@ -28,7 +30,7 @@ window.onload = () => {
   const alpha2 = 10;
 
   //  Flap Path 
-  const pathData = generateFlap4PathData(A, B, theta, alpha1, alpha2);
+  const {pathData,pathDataNoZ} = generateFlap4PathData(A, B, theta, alpha1, alpha2);
 
   const flapPath = document.createElementNS(svgNS, "path");
   flapPath.setAttribute("d", pathData);

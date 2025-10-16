@@ -1,40 +1,14 @@
 
+import { getFilletPoints, type T_point2d } from "../Fillet/getFilletPoints";
+import { DEG2RAD } from "three/src/math/MathUtils";
 
-export type T_point2d = { x: number; y: number };
 
-const rad = (deg: number): number => (deg * Math.PI) / 180;
+
+const rad = (deg: number): number => deg * DEG2RAD;
 const clamp = (v: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, v));
 
-function getFilletPoints(p1: T_point2d, p2: T_point2d, p3: T_point2d, r: number) {
-  const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
-  const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
 
-  const len1 = Math.hypot(v1.x, v1.y);
-  const len2 = Math.hypot(v2.x, v2.y);
-  v1.x /= len1; v1.y /= len1;
-  v2.x /= len2; v2.y /= len2;
-
-  const dot = v1.x * v2.x + v1.y * v2.y;
-  const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
-  const dist = r / Math.tan(angle / 2);
-
-  const T1 = { x: p2.x + v1.x * dist, y: p2.y + v1.y * dist };
-  const T2 = { x: p2.x + v2.x * dist, y: p2.y + v2.y * dist };
-
-  // Adjust for SVG Y-down coordinate system
-  const cross = v1.x * v2.y - v1.y * v2.x;
-  const sign = cross < 0 ? 1 : -1;
-
-  const bis = { x: v1.x + v2.x, y: v1.y + v2.y };
-  const bisLen = Math.hypot(bis.x, bis.y);
-  bis.x /= bisLen; bis.y /= bisLen;
-
-  const h = r / Math.sin(angle / 2);
-  const O = { x: p2.x + bis.x * h * sign, y: p2.y + bis.y * h * sign };
-
-  return { T1, T2, O };
-}
 
 const arc = (O: T_point2d, T1: T_point2d, T2: T_point2d, R: number) => {
   const s = Math.atan2(T1.y - O.y, T1.x - O.x);
@@ -47,7 +21,10 @@ const arc = (O: T_point2d, T1: T_point2d, T2: T_point2d, R: number) => {
   const sf = cross < 0 ? 0 : 1;
   return `A ${R.toFixed(4)} ${R.toFixed(4)} 0 ${laf} ${sf} ${T2.x.toFixed(4)} ${T2.y.toFixed(4)}`;
 };
-
+export type T_PathOutput = {
+  pathData: string;
+  pathDataNoZ: string;
+};
 
 export function generateFlap6PathData(
   P: number,     // width of rectangle
@@ -57,7 +34,7 @@ export function generateFlap6PathData(
   W: number,     // flap height
   R: number,     // fillet radius (for flaps)
   rCircle: number // circle radius (center circle)
-): string {
+): T_PathOutput{
   //  Rectangle base 
   const A: T_point2d = { x: 0, y: 0 };
   const B: T_point2d = { x: P, y: 0 };
@@ -71,8 +48,8 @@ export function generateFlap6PathData(
   const U1 = { x: A.x + W * Math.cos(t1), y: A.y - W * Math.sin(t1) };
   const U2 = { x: B.x + W * Math.cos(t2), y: B.y - W * Math.sin(t2) };
 
-  const { T1, T2, O } = getFilletPoints(A, U1, U2, R);
-  const { T1: T3, T2: T4, O: O2 } = getFilletPoints(U1, U2, B, R);
+const { tangent1: T1, tangent2: T2, center: O } = getFilletPoints(A, U1, U2, R);
+const { tangent1: T3, tangent2: T4, center: O2 } = getFilletPoints(U1, U2, B, R);
 
   const topFlapPath = [
     `M ${A.x} ${A.y}`,
@@ -87,9 +64,8 @@ export function generateFlap6PathData(
   // Left flap (trapezium) 
   const L1 = { x: A.x - W * Math.sin(t1), y: A.y + W * Math.cos(t1) };
   const L2 = { x: D.x - W * Math.sin(t2), y: D.y + W * Math.cos(t2) };
-
-  const { T1: LT1, T2: LT2, O: LO1 } = getFilletPoints(D, L2, L1, R);
-  const { T1: LT3, T2: LT4, O: LO2 } = getFilletPoints(L2, L1, A, R);
+const { tangent1: LT1, tangent2: LT2, center: LO1 } = getFilletPoints(D, L2, L1, R);
+const { tangent1: LT3, tangent2: LT4, center: LO2 } = getFilletPoints(L2, L1, A, R);
 
   const leftFlapPath = [
     `M ${D.x} ${D.y}`,
@@ -105,8 +81,8 @@ export function generateFlap6PathData(
   const R1 = { x: B.x + W * Math.sin(t1), y: B.y + W * Math.cos(t1) };
   const R2 = { x: C.x + W * Math.sin(t2), y: C.y + W * Math.cos(t2) };
 
-  const { T1: RT1, T2: RT2, O: RO1 } = getFilletPoints(B, R1, R2, R);
-  const { T1: RT3, T2: RT4, O: RO2 } = getFilletPoints(R1, R2, C, R);
+const { tangent1: RT1, tangent2: RT2, center: RO1 } = getFilletPoints(B, R1, R2, R);
+const { tangent1: RT3, tangent2: RT4, center: RO2 } = getFilletPoints(R1, R2, C, R);
 
   const rightFlapPath = [
     `M ${B.x} ${B.y}`,
@@ -148,7 +124,7 @@ export function generateFlap6PathData(
   ].join(" ");
 
   //  Combine all svg
-  return [
+   const pathData = [
     rectPath,
     topFlapPath,
     leftFlapPath,
@@ -156,4 +132,8 @@ export function generateFlap6PathData(
     bottomFlapPath,
     circlePath,
   ].join(" ");
+   const pathDataNoZ = pathData.replace(/Z/g, "");
+console.log(pathData)
+console.log(pathDataNoZ)
+  return { pathData, pathDataNoZ };
 }
